@@ -6,6 +6,8 @@ import {motion} from 'framer-motion'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
+const apiUrl = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
+
 const Home = () => {
   const [documents, setDocuments] = useState([]);
 
@@ -13,7 +15,7 @@ const Home = () => {
    useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const { data } = await axios.get("http://localhost:4001/getDocuments", { withCredentials: true });
+        const { data } = await axios.get(`${apiUrl}getDocuments`, { withCredentials: true });
         if (!data.error) {
           setDocuments(data.documents);
         }

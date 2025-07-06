@@ -5,6 +5,8 @@ import axios from 'axios'
 import{toast} from 'react-toastify'
 import {motion} from 'framer-motion'
 
+const apiUrl = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
+
 
 const SignUp = () => {
   const [email,setEmail] = useState("")
@@ -34,7 +36,7 @@ return () => {
 
   const Sign = async () => {
   try{
-    const {data} = await axios.post('http://localhost:4001/SignUser',{
+    const {data} = await axios.post(`${apiUrl}SignUser`,{
       email,
       password
      })

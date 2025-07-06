@@ -3,6 +3,8 @@ import axios from 'axios'
 import {toast} from 'react-toastify'
 import {motion} from 'framer-motion'
 
+const apiUrl = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
+
 
 const Form = ({setDocuments}) => {
 
@@ -33,7 +35,7 @@ useEffect(() => {
 
 const addDocument = async () => {
 try{
-  const {data} = await axios.post("http://localhost:4001/addDoc",{
+  const {data} = await axios.post(`${apiUrl}addDoc`,{
     name,startDate,endDate
   },{withCredentials:true})
   if(data.error==false){

@@ -2,13 +2,14 @@ import React, { useEffect } from 'react'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
+const apiUrl = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 const Table = ({ documents }) => {
  
 
 useEffect(()=>{
 const getDocuments = async () => {
 try{
-  const {data} = await axios.get("http://localhost:4001/getDocuments",{withCredentials:true}) 
+  const {data} = await axios.get(`${apiUrl}/getDocuments`,{withCredentials:true}) 
 if(data.error==false){
 setDocuments(data.documents)
 }
