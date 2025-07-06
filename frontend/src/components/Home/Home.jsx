@@ -15,7 +15,7 @@ const Home = () => {
    useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const { data } = await axios.get(`${apiUrl}getDocuments`, { withCredentials: true });
+        const { data } = await axios.get(`${apiUrl}/getDocuments`, { withCredentials: true });
         if (!data.error) {
           setDocuments(data.documents);
         }

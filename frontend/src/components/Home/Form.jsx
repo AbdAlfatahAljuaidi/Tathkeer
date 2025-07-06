@@ -35,7 +35,7 @@ useEffect(() => {
 
 const addDocument = async () => {
 try{
-  const {data} = await axios.post(`${apiUrl}addDoc`,{
+  const {data} = await axios.post(`${apiUrl}/addDoc`,{
     name,startDate,endDate
   },{withCredentials:true})
   if(data.error==false){

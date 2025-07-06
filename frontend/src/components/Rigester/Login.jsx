@@ -37,7 +37,7 @@ const Login = () => {
 const login = async () => {
 try{
   setDisable(true)
-  const {data} = await axios.post(`${apiUrl}Login`,{
+  const {data} = await axios.post(`${apiUrl}/Login`,{
     email,
     password
   },{
