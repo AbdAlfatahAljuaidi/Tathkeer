@@ -36,7 +36,7 @@ return () => {
 
   const Sign = async () => {
   try{
-    const {data} = await axios.post(`${apiUrl}SignUser`,{
+    const {data} = await axios.post(`${apiUrl}/SignUser`,{
       email,
       password
      })
