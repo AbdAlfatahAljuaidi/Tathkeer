@@ -78,7 +78,7 @@ transition={{
               x,
               y
             }}
-            className='cursor'></motion.div>
+            className='cursor hidden md:block'></motion.div>
       <motion.div
 
       // initial={{x:-200}}

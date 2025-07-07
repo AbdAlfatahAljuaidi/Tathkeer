@@ -83,7 +83,7 @@ return () => {
         x,
         y
       }}
-      className='cursor'></motion.div>
+      className='cursor hidden md:block'></motion.div>
       <div
       
       className="bg-white/70 backdrop-blur-md p-10 rounded-2xl shadow-lg w-[320px] md:w-[420px]">

@@ -67,7 +67,7 @@ try{
         x,
         y
       }}
-      className='cursor  !border-black'></motion.div>
+      className='cursor  !border-black hidden md:block'></motion.div>
       <h1 className="text-xl font-bold border-b border-gray-300 pb-2 w-fit text-blue-600">
         إضافة مستند جديد
       </h1>
