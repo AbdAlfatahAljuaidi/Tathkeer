@@ -7,9 +7,11 @@ const apiUrl = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 const ForgotPassword = () => {
   const navigate = useNavigate()
   const [email, setEmail] = useState('');
+  const [disable, setDisable] = useState(false);
 
   const handleSubmit = async () => {
   try{
+    setDisable(true)
     const {data} = await axios.post(`${apiUrl}/ForgotPassword`,{
       email
      })
@@ -18,6 +20,7 @@ const ForgotPassword = () => {
       navigate("/Login")
      }
   }catch(error){
+    setDisable(false)
     toast.error(error.response.data.message)
     console.log(error);
     
@@ -48,9 +51,10 @@ const ForgotPassword = () => {
           />
         </div>
         <button
+        disabled={disable}
         onClick={()=>handleSubmit()}
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors duration-200"
+          className={`w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors duration-200 ${disable ? "cursor-not-allowed" : "cursor-pointer"}`}
         >
          ارسال كلمة سر جديدة
         </button>

@@ -11,6 +11,7 @@ const Form = ({setDocuments}) => {
 const [name, setName] = useState("")
 const [startDate, setStartDate] = useState("")
 const [endDate, setEndDate] = useState("")
+const [disable, setDisable] = useState(false)
 const [x,setX] = useState(0)
 const [y,setY] = useState(0)
 
@@ -35,11 +36,12 @@ useEffect(() => {
 
 const addDocument = async () => {
 try{
+  setDisable(true)
   const {data} = await axios.post(`${apiUrl}/addDoc`,{
     name,startDate,endDate
   },{withCredentials:true})
   if(data.error==false){
-
+    setDisable(false)
     toast.success("تم اضافة المستند")
     setStartDate("")
     setName("")
@@ -48,6 +50,7 @@ try{
     console.log(data);
   }
 }catch(error){
+  setDisable(false)
   toast.error(error.response.data.message)
   console.log(error);
   
@@ -114,7 +117,7 @@ try{
 
           </div>
         </div>
-            <button  onClick={()=>addDocument()} className='bg-blue-600 text-white px-6 py-2 text-sm rounded-sm hover:cursor-pointer'>اضافة المستند</button>
+            <button  onClick={()=>addDocument()} className={`bg-blue-600 text-white px-6 py-2 text-sm rounded-sm hover:cursor-pointer ${disable ? "cursor-not-allowed" : "cursor-pointer"}`}>اضافة المستند</button>
          
        
       </div>

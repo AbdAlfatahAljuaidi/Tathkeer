@@ -61,9 +61,9 @@ const Login = async (req,res) => {
 
     const user = await User.findOne({email})
 
-    if(user.active==false){
-        return res.status(400).json({error:true,message:"You must active your acount via email"})
-    }
+    // if(user.active==false){
+    //     return res.status(400).json({error:true,message:"You must active your acount via email"})
+    // }
     if(!user){
         return res.status(404).json({error:true,message:"Email does not exist"})
     }
