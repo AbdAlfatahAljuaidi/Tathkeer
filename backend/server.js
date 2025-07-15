@@ -22,7 +22,7 @@ app.use('/',docRouter)
 
 mongoose.connect(process.env.DATABASE_URL).then(()=> {
     app.listen(process.env.PORT,()=> {
-        console.log("Server ready to take off ");
+        console.log(`Server ready to take off ${process.env.PORT} `);
         
     })
 }).catch((err) => {

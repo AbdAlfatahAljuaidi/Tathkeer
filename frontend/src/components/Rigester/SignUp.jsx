@@ -40,17 +40,13 @@ return () => {
       email,
       password
      })
-     console.log(data);
-     if(data.error==false){
+     if(!data.error){
       toast.success("User signup successfully")
-      console.log("signup");
       navigate("/login")
-      
-      
      }
      
   }catch(error){
-    toast.error(error.response.data.message)
+    toast.error(error.response?.data?.message)
     console.log(error);
     
   }
@@ -106,6 +102,7 @@ return () => {
             className="w-full h-11 px-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           />
         </div>
+       
 
         <p className="mt-5 text-sm text-gray-700">
           لدي حساب بالفعل؟{" "}

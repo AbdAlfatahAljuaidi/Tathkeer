@@ -65,7 +65,7 @@ exit={{y:"-100vh"}}
 transition={{
   duration:0.3
 }}
-      className="flex justify-center items-center h-screen"
+      className="flex justify-center items-center h-screen "
       dir="rtl"
       style={{
         backgroundImage: `url(${SignUpPhoto})`,
@@ -104,8 +104,15 @@ transition={{
             className="w-full h-11 px-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
           />
         </div>
-
-        <p className="mt-5 text-sm text-gray-700">
+        <div className="mt-5">
+    <Link
+      to="/forgot-password"
+      className="text-blue-600 text-sm hover:underline"
+    >
+      هل نسيت كلمة السر؟
+    </Link>
+  </div>
+        <p className="mt-2 text-sm text-gray-700">
             ليس لديك حساب ؟{" "}
           <Link to="/" className="text-blue-700 font-semibold hover:underline">
           {" "} تسجيل حساب

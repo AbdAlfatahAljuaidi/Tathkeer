@@ -9,8 +9,14 @@ const userSchema = new mongoose.Schema({
     },
     password:{
         type:String
+    },
+    active:{
+        type:Boolean,
+        default:false
+        
     }
-},{timesstamps:true})
+
+},{timestamps:true})
 
 const User = mongoose.model("user",userSchema)
 
