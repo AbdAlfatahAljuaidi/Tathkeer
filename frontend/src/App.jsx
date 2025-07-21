@@ -6,6 +6,9 @@ import Active from './components/Active/Active'
 import ForgotPassword from './components/Active/ForgotPassword'
 import {ToastContainer} from 'react-toastify'
 import { AnimatePresence } from 'framer-motion'
+import Info from './components/Info/Info'
+import Suggest from './components/Suggest/Suggest'
+import ActivePage from './components/Active/ActivePage'
 
 function App() {
  
@@ -18,11 +21,14 @@ function App() {
       />
       <AnimatePresence mode='wait'>
     <Routes location={location} key={location.pathname}>
-      <Route path='/' element={<SignUp />} />
+      <Route path='/SignUp' element={<SignUp />} />
       <Route path='/Login' element={<Login />} />
       <Route path='/home' element={<Home />} />
       <Route path='/Active/:email' element={<Active />} />
       <Route path='/forgot-password' element={<ForgotPassword />} />
+      <Route path='/' element={<Info />} />
+      <Route path='/Suggest' element={<Suggest />} />
+      <Route path='/ActivePage' element={<ActivePage />} />
     </Routes>
     </AnimatePresence>
     </div>

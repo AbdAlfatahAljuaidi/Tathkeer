@@ -114,7 +114,7 @@ transition={{
   </div>
         <p className="mt-2 text-sm text-gray-700">
             ليس لديك حساب ؟{" "}
-          <Link to="/" className="text-blue-700 font-semibold hover:underline">
+          <Link to="/SignUp" className="text-blue-700 font-semibold hover:underline">
           {" "} تسجيل حساب
           </Link>
         </p>

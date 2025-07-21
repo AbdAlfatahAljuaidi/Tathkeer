@@ -20,7 +20,6 @@ const [y,setY] = useState(0)
 
 useEffect(() => {
   const handleCursor = (e) => {
-    console.log(e.clientX,e.clientY);
     setX(e.clientX -20)
     setY(e.clientY - 20)
   

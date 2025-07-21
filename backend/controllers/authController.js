@@ -3,6 +3,7 @@ const {User,userValidation}= require('../models/User')
 const jwt = require('jsonwebtoken')
 const activeEmail = require('../utils/active')
 const forgotPassword = require('../utils/passord')
+const {Suggest,suggestValidation} = require("../models/Suggest")
 
 
 const Signup = async (req,res) => {
@@ -101,6 +102,39 @@ res.cookie('token', token, {
 
 
 
+const sendEmail = async (req,res) => {
+try{
+  
+  const token = req.cookies.token;
+      if (!token) {
+        return res.status(401).json({ error: true, message: "Unauthorized: No token provided" });
+      }
+  
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const email = decoded.email;
+
+
+  
+     const link = `http://localhost:5173/Active/${email}`;
+    
+    await activeEmail(
+        email,
+        link,
+        "Activate Your Account",
+        "active",
+    )
+
+    return res.status(200).json({error:false,message:"تم ارسال الايميل لتفعيل حسابك"})
+}catch(error){
+  console.log(error);
+  return res.status(200).json({error:false,message:"Internal server error"})
+}
+
+}
+
+
+
+
 const ActiveAccount = async (req,res) => {
    try{
     const {email} = req.params
@@ -124,6 +158,9 @@ const ActiveAccount = async (req,res) => {
    }
 
 } 
+
+
+
 const generateRandomPassword = (length = 10) => {
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
     let password = '';
@@ -151,6 +188,12 @@ const generateRandomPassword = (length = 10) => {
           message: "User does not exist",
         });
       }
+
+
+if(user.active==false){
+  return res.status(400).json({error:true,message:"يجب عليك تفعيل حسابك اولا "})
+}
+
   
       const newPassword = generateRandomPassword();
   
@@ -183,12 +226,87 @@ const generateRandomPassword = (length = 10) => {
       });
     }
   };
+
+
+
+
+  const suggestSubmit = async (req,res) => {
+   try{
+    
+
+const {error}= suggestValidation(req.body)
+
+if(error){
+  return res.status(400).json({error:true,message:error.details[0].message})
+}
+
+
+const token = req.cookies.token
+if (!token) {
+    return res.status(401).json({ error: true, message: "يرجى الذهاب لتسجيل الدخول اولا بعد ذلك يمكنك عمل اقتراح" });
+  }
+
+    const decoded = jwt.verify(token,process.env.JWT_SECRET)
+    const email = decoded.email
+
+
+
+const user = await User.findOne({email})
+
+if(user.active==false){
+  return res.status(400).json({error:true,message:"يجب عليك تفعيل حسابك اولا "})
+}
+
+    
+    const {name,type,details} = req.body
+
+
+    const suggest = await Suggest.create({
+      name,email,type,details
+    })
+
+
+    return res.status(200).json({error:false , message:"تم ارسال اقتراحك بنجاح" })
+   }catch(error){
+    console.log(error);
+    return res.status(500).json({error:true , message:"Internal server error" })
+    
+   }
+
+  }
+
+
+
+
+  const Logout = async (req,res) => {
   
+try{
+  console.log("الكوكيز قبل الحذف:", req.cookies);
+  res.clearCookie("token",{
+    httpOnly:true,
+    secure:true,
+    sameSite:'None',
+
+
+  })
+
+  console.log("الكوكيز fu] الحذف:", req.cookies);
+  return res.status(200).json({error:false,message:"تم تسجل الخروج"}) 
+}catch(error){
+  console.log(error);
+  return res.status(500).json({error:true,message:"Internal server error"}) 
+  
+}
+  
+  }
 
 
 module.exports={
     Signup,
     Login,
     ActiveAccount,
-    ForgotPassword
+    ForgotPassword,
+    suggestSubmit,
+    sendEmail,
+    Logout
 }
