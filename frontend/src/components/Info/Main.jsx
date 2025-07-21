@@ -2,8 +2,7 @@ import React from 'react'
 
 import Info from '../../assets/Info.jpg'
 import {Link} from 'react-router-dom'
-import { SlCalender } from "react-icons/sl";
-import { FaComments } from "react-icons/fa";
+import { FaComments,FaCalendarAlt  } from "react-icons/fa";
 import { AiFillSafetyCertificate } from "react-icons/ai";
 
 
@@ -16,7 +15,7 @@ const Main = () => {
     {
       title: "تذكيرات تلقائية",
       description: "استقبل تذكيرات تلقائية عبر البريد الالكتروني",
-      icon: <SlCalender className="text-primary" />
+      icon: <FaCalendarAlt  className="text-primary" />
     },
     {
       title: "اقتراحات ذكية",
