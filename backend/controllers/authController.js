@@ -1,10 +1,12 @@
 const express = require('express')
 const {User,userValidation}= require('../models/User')
+const Document= require("../models/Document")
 const jwt = require('jsonwebtoken')
 const activeEmail = require('../utils/active')
 const forgotPassword = require('../utils/passord')
 const {Suggest,suggestValidation} = require("../models/Suggest")
-
+const cron = require('node-cron')
+const tathkeerEmail = require('../utils/tathkeer')
 
 const Signup = async (req,res) => {
    try{
@@ -299,6 +301,70 @@ try{
 }
   
   }
+
+
+
+  cron.schedule('0 6 * * *', async () => {
+    console.log("🚀 بدء فحص الوثائق المنتهية اليوم أو خلال أسبوع...");
+  
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // بداية اليوم
+      const weekLater = new Date(today);
+      weekLater.setDate(weekLater.getDate() + 7); // بداية اليوم بعد 7 أيام
+  
+      // استعلام يجلب الوثائق اللي تاريخ انتهائها اليوم أو بعد 7 أيام
+      const expiringDocs = await Document.find({
+        endDate: {
+          $in: [today, weekLater],
+        }
+      }).populate('userId');
+  
+      if (expiringDocs.length === 0) {
+        console.log("✅ لا يوجد وثائق تنتهي اليوم أو بعد أسبوع.");
+        return;
+      }
+  
+      for (const doc of expiringDocs) {
+        const user = doc.userId;
+  
+        if (!user || !user.email) {
+          console.warn(`⚠️ لا يوجد إيميل مرتبط بوثيقة ${doc._id}`);
+          continue;
+        }
+  
+        const email = user.email;
+        const documentName = doc.name;
+  
+        // تمييز نوع الإشعار حسب التاريخ
+        let subject = "";
+        if (doc.endDate.getTime() === today.getTime()) {
+          subject = `وثيقتك "${documentName}" تنتهي اليوم`;
+        } else if (doc.endDate.getTime() === weekLater.getTime()) {
+          subject = `تنبيه: وثيقتك "${documentName}" ستنتهي خلال أسبوع`;
+        }
+  
+        await tathkeerEmail(
+          email,
+          documentName,
+          subject,
+          "tathkeer"
+        );
+  
+        console.log(`📩 تم إرسال إشعار إلى: ${email} - الموضوع: "${subject}"`);
+      }
+  
+    } catch (error) {
+      console.error("❌ خطأ أثناء تنفيذ المهمة المجدولة:", error);
+    }
+  });
+
+
+
+
+
+
+
 
 
 module.exports={

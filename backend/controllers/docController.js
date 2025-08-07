@@ -51,13 +51,37 @@ const getDocuments = async (req, res) => {
       return res.status(500).json({ error: true, message: "Internal server error" });
     }
   };
+
+
+  const deleteDocument = async (req,res) => {
+    try{
+      console.log("tetttttttttttttttttttttt");
+      
+const {id} = req.body;
+console.log("id",id);
+
+const document = await Document.findById(id)
+if(!document){
+  res.status(404).json({error:true,message:"Document not found"})
+}
+
+await Document.deleteOne({_id:id})
+res.status(200).json({error:false,message:"Document has been deleted successfully"})
+
+    }catch(error){
+      console.log(error);
+      res.status(500).json({error:true,message:"Internal server error"})
+      
+    }
+  }
   
 
 
 
 module.exports={
     addDocument,
-    getDocuments
+    getDocuments,
+    deleteDocument
 }
 
 
