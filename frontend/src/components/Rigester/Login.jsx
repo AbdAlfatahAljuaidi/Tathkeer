@@ -45,7 +45,7 @@ try{
   })
   if(!data.error){
 navigate("/home")
-toast.success("Welcome")
+toast.success("مرحبا بك")
   }
 
 }catch(error){

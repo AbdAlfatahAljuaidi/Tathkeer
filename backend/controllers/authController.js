@@ -7,6 +7,7 @@ const forgotPassword = require('../utils/passord')
 const {Suggest,suggestValidation} = require("../models/Suggest")
 const cron = require('node-cron')
 const tathkeerEmail = require('../utils/tathkeer')
+const shell = require('shelljs')
 
 const Signup = async (req,res) => {
    try{
@@ -302,66 +303,72 @@ try{
   
   }
 
-
-
-  cron.schedule('0 6 * * *', async () => {
+  cron.schedule("* 2 * * * *", async () => {
     console.log("🚀 بدء فحص الوثائق المنتهية اليوم أو خلال أسبوع...");
   
     try {
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // بداية اليوم
-      const weekLater = new Date(today);
-      weekLater.setDate(weekLater.getDate() + 7); // بداية اليوم بعد 7 أيام
+      today.setHours(0, 0, 0, 0);
   
-      // استعلام يجلب الوثائق اللي تاريخ انتهائها اليوم أو بعد 7 أيام
+      const weekLater = new Date(today);
+      weekLater.setDate(weekLater.getDate() + 7);
+  
+      // الوثائق اللي تنتهي اليوم أو بعد أسبوع
       const expiringDocs = await Document.find({
-        endDate: {
-          $in: [today, weekLater],
-        }
-      }).populate('userId');
+        $or: [
+          {
+            endDate: {
+              $gte: today, // بداية اليوم
+              $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) // نهاية اليوم
+            }
+          },
+          {
+            endDate: {
+              $gte: weekLater, // بداية يوم بعد 7 أيام
+              $lt: new Date(weekLater.getTime() + 24 * 60 * 60 * 1000) // نهاية اليوم بعد 7 أيام
+            }
+          }
+        ]
+      }, { userId: 1, name: 1, endDate: 1 });
   
       if (expiringDocs.length === 0) {
         console.log("✅ لا يوجد وثائق تنتهي اليوم أو بعد أسبوع.");
         return;
       }
   
-      for (const doc of expiringDocs) {
-        const user = doc.userId;
+      // IDs المستخدمين الفريدة
+      const userIds = [...new Set(expiringDocs.map(doc => doc.userId.toString()))];
   
-        if (!user || !user.email) {
+      // الإيميلات
+      const users = await User.find({ _id: { $in: userIds } }, { email: 1 });
+      const userMap = new Map(users.map(u => [u._id.toString(), u.email]));
+  
+      // إرسال إشعارات
+      for (const doc of expiringDocs) {
+        const email = userMap.get(doc.userId.toString());
+  
+        if (!email) {
           console.warn(`⚠️ لا يوجد إيميل مرتبط بوثيقة ${doc._id}`);
           continue;
         }
   
-        const email = user.email;
-        const documentName = doc.name;
-  
-        // تمييز نوع الإشعار حسب التاريخ
         let subject = "";
         if (doc.endDate.getTime() === today.getTime()) {
-          subject = `وثيقتك "${documentName}" تنتهي اليوم`;
+          subject = `وثيقتك "${doc.name}" تنتهي اليوم`;
         } else if (doc.endDate.getTime() === weekLater.getTime()) {
-          subject = `تنبيه: وثيقتك "${documentName}" ستنتهي خلال أسبوع`;
+          subject = `تنبيه: وثيقتك "${doc.name}" ستنتهي خلال أسبوع`;
         }
+  console.log("========================================");
   
-        await tathkeerEmail(
-          email,
-          documentName,
-          subject,
-          "tathkeer"
-        );
   
+        await tathkeerEmail(email, doc.name, subject, "tathkeerTemplate");
         console.log(`📩 تم إرسال إشعار إلى: ${email} - الموضوع: "${subject}"`);
       }
-  
     } catch (error) {
       console.error("❌ خطأ أثناء تنفيذ المهمة المجدولة:", error);
     }
   });
-
-
-
-
+  
 
 
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect,useRef } from 'react'
 import axios from 'axios'
 import {toast} from 'react-toastify'
 import {motion} from 'framer-motion'
@@ -8,6 +8,8 @@ const apiUrl = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
 
 const Form = ({setDocuments}) => {
 
+  const r = useRef(null)
+
 const [name, setName] = useState("")
 const [startDate, setStartDate] = useState("")
 const [endDate, setEndDate] = useState("")
@@ -16,12 +18,15 @@ const [x,setX] = useState(0)
 const [y,setY] = useState(0)
 
 
-
+useEffect(()=>{
+  r.current.focus();
+},[])
 
 useEffect(() => {
   const handleCursor = (e) => {
     setX(e.clientX -20)
     setY(e.clientY - 20)
+   
   
   }
   window.addEventListener("mousemove",handleCursor)
@@ -47,6 +52,7 @@ try{
     setEndDate("")
     setDocuments(prevDocs => [...prevDocs, data.newDocument]);
     console.log(data);
+    location.reload()
   }
 }catch(error){
   setDisable(false)
@@ -81,6 +87,7 @@ try{
             اسم المستند
           </label>
           <input
+          ref={r}
           onChange={(e)=>setName(e.target.value)}
           value={name}
             type="text"

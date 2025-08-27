@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import {Link} from 'react-router-dom'
 import { toast } from 'react-toastify'
 
 const apiUrl = import.meta.env.VITE_REACT_APP_BACKEND_BASEURL;
-const Table = ({ documents }) => {
+const Table = () => {
+  const [documents, setDocuments] = useState([])
  
 
 useEffect(()=>{
@@ -28,8 +30,10 @@ const deleteDocument = async (id) => {
   
   try{
     const {data} = await axios.delete(`${apiUrl}/deleteDocument`,{
-      id
+    data:{id}  
     })
+
+    setDocuments(prevDocs=> prevDocs.filter((doc=> doc._id!==id)))
   
     if(data.error==false){
       toast.success(data.message)
@@ -42,7 +46,7 @@ const deleteDocument = async (id) => {
 }
 
   return (
-    <div className="p-6">
+    <div className="p-6" dir='ltr'>
       <h2 className="text-xl font-bold text-right mb-4 text-blue-600">المستندات</h2>
 
       <div className="overflow-x-auto">
@@ -62,8 +66,9 @@ const deleteDocument = async (id) => {
     <td className="px-4 py-2 border">
       <div className='flex justify-center items-center'>
         <button onClick={()=>deleteDocument(doc._id)} className='mx-2 bg-red-400 text-white py-2 px-4 rounded-md hover:cursor-pointer'>حذف </button>
+       <Link to={`/updateDocument/${doc._id}`}>
         <button className='bg-green-400 text-white py-2 px-4 rounded-md hover:cursor-pointer'>تعديل </button>
-
+        </Link>
       </div>
     </td>
     <td className="px-4 py-2 border">{new Date(doc.endDate).toLocaleDateString('ar-JO')}</td>
