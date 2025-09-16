@@ -55,7 +55,6 @@ const getDocuments = async (req, res) => {
 
   const deleteDocument = async (req,res) => {
     try{
-      console.log("tetttttttttttttttttttttt");
       
 const {id} = req.body;
 console.log("id",id);
@@ -64,6 +63,8 @@ const document = await Document.findById(id)
 if(!document){
   res.status(404).json({error:true,message:"Document not found"})
 }
+
+
 
 await Document.deleteOne({_id:id})
 res.status(200).json({error:false,message:"تم حذف البيانات بنجاح"})

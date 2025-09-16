@@ -3,7 +3,7 @@ const User = require('../models/User');
 
 const documentModel = new mongoose.Schema({
   name: {
-    type: String,
+    type: String,  
     required: true
   },
   startDate: {
