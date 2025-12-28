@@ -1,52 +1,55 @@
 const { createTransport } = require("nodemailer");
+const axios = require("axios");
 const path = require("path");
+const fs = require("fs");
 const hbs = require("nodemailer-express-handlebars");
 require("dotenv").config();
 
 
 module.exports = async (to, documentName , subject, template) => {
 
-    try {
-      const transporter = createTransport({
-        host: process.env.HOST,
-        port: 587,
-        auth: {
-          user: process.env.USER,
-          pass: process.env.PASS,
-        },
-      });
-  
-      const handlebarsOptions = {
-        viewEngine: {
-          extname: ".handlebars",
-          partialsDir: path.resolve("./views"),
-          defaultLayout: false,
-        },
-        viewPath: path.resolve("./views"),
-        extName: ".handlebars",
-      };
-  
-      transporter.use("compile", hbs(handlebarsOptions));
-  
-      const mailOptions = {
-        from: {
-          name: "Tathkeer Team",
-          address: process.env.EMAIL,
-        },
-        to: to,
-        subject: subject, // مثلاً: "تم التعليق على منشورك"
-        template: template, // مثلاً: 'postCommentNotification'
-        context: {
-            documentName, // اسم صاحب المنشور
-          
-        
-        },
-      };
-  
-      return transporter.sendMail(mailOptions);
-    } catch (error) {
-      console.log("Email send error:", error);
-    }
-  };
-  
 
+
+  try {
+    // 1️⃣ Locate and compile the Handlebars template
+    const templatePath = path.resolve("./views", `${template}.handlebars`);
+    const source = fs.readFileSync(templatePath, "utf8");
+    const compiledTemplate = handlebars.compile(source);
+
+    // 2️⃣ Render the HTML content
+    const htmlContent = compiledTemplate({ name, password });
+
+    // 3️⃣ Send the email via Brevo API
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "Tathkeer Team",
+          email: process.env.EMAIL,
+        },
+        to: [{ email: to, name }],
+        subject,
+        template,
+        context: {
+          documentName, // اسم صاحب المنشور
+        
+      
+      },
+      },
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("✅ Email sent successfully via Brevo API");
+    console.log("Response:", response.data);
+
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error sending email via Brevo:", error.response?.data || error.message);
+    throw error;
+  }
+};
