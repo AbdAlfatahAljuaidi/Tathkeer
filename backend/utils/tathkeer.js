@@ -1,40 +1,30 @@
-const { createTransport } = require("nodemailer");
 const axios = require("axios");
 const path = require("path");
 const fs = require("fs");
-const hbs = require("nodemailer-express-handlebars");
+const handlebars = require("handlebars"); // تأكد من استدعاء المكتبة الأساسية
 require("dotenv").config();
 
-
-module.exports = async (to, documentName , subject, template) => {
-
-
-
+module.exports = async (to, documentName, subject, templateName) => {
   try {
-    // 1️⃣ Locate and compile the Handlebars template
-    const templatePath = path.resolve("./views", `${template}.handlebars`);
+    // 1️⃣ تحديد مسار ملف القالب وقراءته
+    const templatePath = path.resolve("./views", `${templateName}.handlebars`);
     const source = fs.readFileSync(templatePath, "utf8");
+
+    // 2️⃣ تجميع القالب (Compile) ووضع البيانات (documentName) بداخله
     const compiledTemplate = handlebars.compile(source);
+    const htmlContent = compiledTemplate({ documentName });
 
-    // 2️⃣ Render the HTML content
-    const htmlContent = compiledTemplate({ name, password });
-
-    // 3️⃣ Send the email via Brevo API
+    // 3️⃣ إرسال الإيميل عبر Brevo API
     const response = await axios.post(
       "https://api.brevo.com/v3/smtp/email",
       {
         sender: {
           name: "Tathkeer Team",
-          email: process.env.EMAIL,
+          email: process.env.EMAIL, // يجب أن يكون الإيميل المسجل في بريفو
         },
-        to: [{ email: to, name }],
-        subject,
-        template,
-        context: {
-          documentName, // اسم صاحب المنشور
-        
-      
-      },
+        to: [{ email: to }],
+        subject: subject,
+        htmlContent: htmlContent, // هنا نرسل الـ HTML الذي تم إنتاجه
       },
       {
         headers: {
@@ -44,12 +34,10 @@ module.exports = async (to, documentName , subject, template) => {
       }
     );
 
-    console.log("✅ Email sent successfully via Brevo API");
-    console.log("Response:", response.data);
-
+    console.log(`✅ تم الإرسال بنجاح إلى: ${to}`);
     return response.data;
   } catch (error) {
-    console.error("❌ Error sending email via Brevo:", error.response?.data || error.message);
+    console.error("❌ خطأ في الإرسال:", error.response?.data || error.message);
     throw error;
   }
 };

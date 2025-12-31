@@ -302,10 +302,7 @@ try{
 }
   
   }
-
-  cron.schedule("0 10 * * *", async () => {
-    console.log("🚀 بدء فحص الوثائق المنتهية اليوم أو خلال أسبوع...");
-  
+  cron.schedule("0 6 * * *", async () => {
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -313,62 +310,30 @@ try{
       const weekLater = new Date(today);
       weekLater.setDate(weekLater.getDate() + 7);
   
-      // الوثائق اللي تنتهي اليوم أو بعد أسبوع
+      // البحث عن الوثائق
       const expiringDocs = await Document.find({
-        $or: [
-          {
-            endDate: {
-              $gte: today, // بداية اليوم
-              $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) // نهاية اليوم
-            }
-          },
-          {
-            endDate: {
-              $gte: weekLater, // بداية يوم بعد 7 أيام
-              $lt: new Date(weekLater.getTime() + 24 * 60 * 60 * 1000) // نهاية اليوم بعد 7 أيام
-            }
-          }
-        ]
-      }, { userId: 1, name: 1, endDate: 1 });
+        endDate: {
+          $in: [today, weekLater] // سيعمل فقط إذا كانت التواريخ مخزنة في قاعدة البيانات بدون وقت (00:00:00)
+        }
+      });
   
-      if (expiringDocs.length === 0) {
-        console.log("✅ لا يوجد وثائق تنتهي اليوم أو بعد أسبوع.");
-        return;
-      }
-  
-      // IDs المستخدمين الفريدة
-      const userIds = [...new Set(expiringDocs.map(doc => doc.userId.toString()))];
-  
-      // الإيميلات
-      const users = await User.find({ _id: { $in: userIds } }, { email: 1 });
-      const userMap = new Map(users.map(u => [u._id.toString(), u.email]));
-  
-      // إرسال إشعارات
       for (const doc of expiringDocs) {
-        const email = userMap.get(doc.userId.toString());
+        const user = await User.findById(doc.userId);
+        if (!user || !user.email) continue;
   
-        if (!email) {
-          console.warn(`⚠️ لا يوجد إيميل مرتبط بوثيقة ${doc._id}`);
-          continue;
-        }
+        // مقارنة الوقت للرسالة
+        const isToday = doc.endDate.getTime() === today.getTime();
+        const subject = isToday 
+          ? `وثيقتك "${doc.name}" تنتهي اليوم` 
+          : `تنبيه: وثيقتك "${doc.name}" ستنتهي خلال أسبوع`;
   
-        let subject = "";
-        if (doc.endDate.getTime() === today.getTime()) {
-          subject = `وثيقتك "${doc.name}" تنتهي اليوم`;
-        } else if (doc.endDate.getTime() === weekLater.getTime()) {
-          subject = `تنبيه: وثيقتك "${doc.name}" ستنتهي خلال أسبوع`;
-        }
-  console.log("========================================");
-  
-  
-        await tathkeerEmail(email, doc.name, subject, "tathkeerTemplate");
-        console.log(`📩 تم إرسال إشعار إلى: ${email} - الموضوع: "${subject}"`);
+          await tathkeerEmail(email, doc.name, subject, "tathkeerTemplate");
+        console.log(`📩 Sent to: ${user.email}`);
       }
     } catch (error) {
-      console.error("❌ خطأ أثناء تنفيذ المهمة المجدولة:", error);
+      console.error("❌ Cron Error:", error);
     }
   });
-  
 
 
 
